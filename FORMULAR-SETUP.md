@@ -1,11 +1,14 @@
-# HANSE VEND – Web3Forms aktivieren
+# HANSE VEND: Kontaktformular und Abnahmetest
 
-1. Auf https://web3forms.com/ für **info@hanse-vend.de** einen neuen Access Key anfordern.
-2. Den Bestätigungslink aus dem Postfach anklicken.
-3. In Vercel unter **Project → Settings → Environment Variables** `VITE_WEB3FORMS_ACCESS_KEY` mit dem neuen Schlüssel hinterlegen (Production, Preview).
-4. **Redeploy** auslösen, damit Vite den Schlüssel beim Build einbindet.
-5. Über die Vorschau eine Testanfrage senden und den Eingang in info@hanse-vend.de prüfen.
+Das Formular in `src/App.tsx` verwendet Web3Forms. Der vorhandene, für HANSE VEND erstellte Access Key ist im Client-Code eingebunden. Der Schlüssel ist ein öffentlicher Client-Key, kein Server-Secret. Eine Vercel-Umgebungsvariable ist für den aktuellen Stand **nicht erforderlich**.
 
-Der bisherige Web3Forms-Schlüssel von dein-snackautomat.de wird nicht verwendet. Web3Forms-Access-Keys sind im Browser sichtbar und keine vertraulichen Server-Secrets; die Anbieter- und Domain-Einstellungen müssen gegen Missbrauch geprüft werden.
+## Vor dem Livegang
+1. Im Web3Forms-Konto prüfen, dass der Schlüssel dem Empfänger `info@hanse-vend.de` zugeordnet ist und die Domain `hanse-vend.de` zulässig ist.
+2. Datenschutzhinweise, Anbieterunterlagen und die datenschutzrechtliche Grundlage für den Einsatz von Web3Forms rechtlich prüfen.
+3. Auf der endgültigen HTTPS-Domain eine Anfrage mit realer Test-E-Mail-Adresse absenden. Die Website muss die Annahme durch den Dienst anzeigen.
+4. Den tatsächlichen **Posteingang** unter `info@hanse-vend.de` prüfen, auch Spam. Nur die Erfolgsmeldung des Formularservices ist kein Zustellnachweis.
+5. Testfälle: ungültige E-Mail, leere Pflichtfelder, Netzwerkfehler, Smartphone und Tastaturbedienung.
+6. Falls der Anbieter die Anfrage ablehnt, wird die Fehlermeldung angezeigt und die direkte E-Mail-Adresse bleibt erreichbar.
 
-Ohne konfigurierte Variable wird kein Versand ausgelöst und die Website zeigt eine verständliche Fehlermeldung mit der Kontaktadresse.
+## Technische Details
+POST an `https://api.web3forms.com/submit` mit `access_key`, `email`, `replyto`, Betreff, Standortdaten und Nachricht. Kein eigener PHP- oder Node-Server auf IONOS notwendig.
