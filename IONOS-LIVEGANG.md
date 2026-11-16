@@ -3,7 +3,7 @@
 ## Vor dem Umschalten
 
 - `npm install` und `npm run build` lokal oder in einer CI-Umgebung ausführen. Nur den **Inhalt** von `dist/` hochladen, nicht den Quellcode.
-- Die bislang externen Bilder unter `raw.githubusercontent.com` in lokale Dateien übernehmen und die Referenzen in `src/App.tsx` umstellen.
+- Bilder werden beim Build durch `scripts/prepare-media.mjs` nach `public/media/` übernommen und anschließend von derselben Domain geladen. Bildrechte weiterhin prüfen.
 - Datenschutzerklärung juristisch prüfen: IONOS-Vertrag/AVV, Web3Forms-Datenverarbeitung, Drittlandtransfers, Aufbewahrung und extern geladene Bilder.
 - Produktionsversion auf Mobilgerät und Desktop testen, alle Bilder/Links prüfen.
 
@@ -21,3 +21,7 @@
 - Vite ist statisch gebaut; die bestehende Navigation nutzt Anker und separate `.html`-Seiten, daher ist normalerweise keine SPA-Rewrite-Regel erforderlich.
 - Web3Forms Access Key ist im Client-Code als Fallback enthalten; kein zusätzlicher IONOS-Serverdienst erforderlich.
 - GitHub-Änderungen werden **nicht automatisch** bei IONOS veröffentlicht. Bei jeder Änderung erneut bauen und hochladen.
+
+## Fertiges IONOS-Paket herunterladen
+
+In GitHub unter **Actions → IONOS deployment package** den neuesten erfolgreichen Lauf öffnen und das Artefakt **hanse-vend-ionos-dist** herunterladen. ZIP entpacken und **den Inhalt** des Artefakts (inklusive index.html, assets/, media/, impressum.html und datenschutz.html) in das neue IONOS-Zielverzeichnis hochladen. Bei späteren Updates erneut ein aktuelles Artefakt erzeugen. Die ZIP ist kein Ersatz für den erfolgreichen Live-Test.
