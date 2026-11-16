@@ -1,0 +1,54 @@
+name: HANSE VEND - IONOS Veröffentlichung
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: hanse-vend-ionos-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ionos-production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - name: Verify website package
+        run: |
+          test -s dist/index.html
+          test -s dist/impressum.html
+          test -s dist/datenschutz.html
+          test -s dist/media/referenz-1.jpg
+      - name: Configure secure SSH
+        env:
+          IONOS_SSH_PRIVATE_KEY: ${{ secrets.IONOS_SSH_PRIVATE_KEY }}
+          IONOS_KNOWN_HOSTS: ${{ secrets.IONOS_KNOWN_HOSTS }}
+        run: |
+          test -n "$IONOS_SSH_PRIVATE_KEY"
+          test -n "$IONOS_KNOWN_HOSTS"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$IONOS_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$IONOS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+      - name: Upload only to confirmed HANSE VEND folder
+        env:
+          IONOS_SSH_HOST: ${{ vars.IONOS_SSH_HOST }}
+          IONOS_SSH_USER: ${{ vars.IONOS_SSH_USER }}
+          IONOS_TARGET_DIR: ${{ vars.IONOS_TARGET_DIR }}
+        run: |
+          set -euo pipefail
+          test -n "$IONOS_SSH_HOST"
+          test -n "$IONOS_SSH_USER"
+          case "$IONOS_TARGET_DIR" in
+            */hanse-vend|*/hanse-vend/) ;;
+            *) echo "Target directory must end in /hanse-vend"; exit 1;;
+          esac
+          REMOTE="$IONOS_SSH_USER@$IONOS_SSH_HOST"
+          ssh -o BatchMode=yes "$REMOTE" "test -f '$IONOS_TARGET_DIR/.hanse-vend-deploy-allowed'"
+          tar -C dist -cf - . | ssh -o BatchMode=yes "$REMOTE" "cd '$IONOS_TARGET_DIR' && tar -xf -"
+          ssh -o BatchMode=yes "$REMOTE" "test -s '$IONOS_TARGET_DIR/index.html' && test -s '$IONOS_TARGET_DIR/impressum.html'"
